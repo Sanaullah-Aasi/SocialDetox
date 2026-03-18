@@ -1,11 +1,14 @@
 import 'package:flutter/services.dart';
 
+/// Core VPN Service for app blocking functionality.
+/// This is a platform-agnostic service that communicates with native code.
 class VpnService {
   static const MethodChannel _channel = MethodChannel(
     'com.example.socialdetox/vpn',
   );
 
   /// Get list of installed apps from native Android
+  /// Returns a list of maps containing app info (packageName, appName, icon)
   Future<List<Map<String, dynamic>>> getInstalledApps() async {
     try {
       final List<dynamic> result = await _channel.invokeMethod(
@@ -18,7 +21,8 @@ class VpnService {
   }
 
   /// Start blocking the specified apps
-  /// Returns true if successful, throws PlatformException on error
+  /// [blockedPackages] - List of package names to block
+  /// Returns true if successful, throws exception on error
   Future<bool> startBlocking(List<String> blockedPackages) async {
     try {
       final bool result = await _channel.invokeMethod('startBlocking', {
@@ -36,6 +40,7 @@ class VpnService {
   }
 
   /// Stop blocking all apps
+  /// Returns true if successful
   Future<bool> stopBlocking() async {
     try {
       final bool result = await _channel.invokeMethod('stopBlocking');
@@ -46,6 +51,7 @@ class VpnService {
   }
 
   /// Check if VPN is currently active
+  /// Returns true if VPN tunnel is running
   Future<bool> isVpnActive() async {
     try {
       final bool result = await _channel.invokeMethod('isVpnActive');
@@ -56,7 +62,7 @@ class VpnService {
   }
 }
 
-// Custom exceptions
+/// Base exception for VPN-related errors
 class VpnException implements Exception {
   final String message;
   VpnException(this.message);
@@ -65,6 +71,7 @@ class VpnException implements Exception {
   String toString() => 'VpnException: $message';
 }
 
+/// Exception thrown when VPN permission is denied by user
 class VpnPermissionDeniedException extends VpnException {
   VpnPermissionDeniedException(super.message);
 

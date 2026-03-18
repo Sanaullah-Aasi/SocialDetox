@@ -1,8 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
-import '../models/app_info.dart';
-import '../services/vpn_service.dart';
+import 'package:social_detox_core/social_detox_core.dart';
 
 class DetoxProvider with ChangeNotifier {
   final VpnService _vpnService = VpnService();

@@ -10,6 +10,10 @@ dependencies:
   flutter:
     sdk: flutter
   
+  # Core engine (local package)
+  social_detox_core:
+    path: ./packages/social_detox_core
+  
   # Local storage
   shared_preferences: ^2.2.0
   

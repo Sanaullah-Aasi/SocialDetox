@@ -405,6 +405,13 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  social_detox_core:
+    dependency: "direct main"
+    description:
+      path: "packages/social_detox_core"
+      relative: true
+    source: path
+    version: "1.0.0"
   source_span:
     dependency: transitive
     description:

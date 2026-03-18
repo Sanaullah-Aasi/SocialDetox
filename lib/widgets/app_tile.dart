@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../theme/app_colors.dart';
-import '../models/app_info.dart';
+import 'package:social_detox_core/social_detox_core.dart';
 
 /// Project Zenith V2 - App Tile with squircle, glass-bevel, and animated glow
 class AppTile extends StatefulWidget {
