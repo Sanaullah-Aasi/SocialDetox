@@ -1,158 +1,154 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'dart:ui';
 import '../providers/detox_provider.dart';
-import '../widgets/status_card.dart';
-import 'app_selection_screen.dart';
-import 'settings_screen.dart';
+import '../theme/app_colors.dart';
+import '../widgets/power_button.dart';
+import '../widgets/glass_card.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
+    return Consumer<DetoxProvider>(
+      builder: (context, provider, child) {
+        return SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.only(bottom: 120),
+            child: Column(
+              children: [
+                const SizedBox(height: 20),
 
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        title: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ShaderMask(
-              shaderCallback:
-                  (bounds) => LinearGradient(
-                    colors: [
-                      theme.colorScheme.primary,
-                      theme.colorScheme.secondary,
-                    ],
-                  ).createShader(bounds),
-              child: const Icon(
-                Icons.shield_moon_rounded,
-                color: Colors.white,
-                size: 28,
-              ),
+                // Header
+                _buildHeader(context),
+
+                const SizedBox(height: 40),
+
+                // Power Button
+                _buildPowerSection(context, provider),
+
+                const SizedBox(height: 40),
+
+                // Quick Stats
+                _buildStatsSection(context, provider),
+
+                const SizedBox(height: 24),
+
+                // Error Banner
+                if (provider.errorMessage != null)
+                  _buildErrorBanner(context, provider),
+
+                // Blocked Apps Preview
+                if (provider.blockedAppsCount > 0)
+                  _buildBlockedAppsPreview(context, provider),
+              ],
             ),
-            const SizedBox(width: 12),
-            Text(
-              'SocialDetox',
-              style: GoogleFonts.outfit(
-                fontWeight: FontWeight.bold,
-                letterSpacing: 0.5,
-              ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildHeader(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Row(
+        children: [
+          ShaderMask(
+            shaderCallback: (bounds) => const LinearGradient(
+              colors: [AppColors.primaryPurple, AppColors.primaryCyan],
+            ).createShader(bounds),
+            child: const Icon(
+              Icons.shield_rounded,
+              size: 32,
+              color: Colors.white,
             ),
-          ],
-        ),
-        actions: [
-          Container(
-            margin: const EdgeInsets.only(right: 16),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surface.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                color: theme.colorScheme.surface.withValues(alpha: 0.1),
-              ),
-            ),
-            child: IconButton(
-              icon: const Icon(Icons.settings_outlined, size: 22),
-              onPressed:
-                  () => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const SettingsScreen()),
-                  ),
+          ),
+          const SizedBox(width: 12),
+          const Text(
+            'SocialDetox',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textPrimary,
             ),
           ),
         ],
       ),
-      body: Stack(
+    );
+  }
+
+  Widget _buildPowerSection(BuildContext context, DetoxProvider provider) {
+    return Column(
+      children: [
+        // Power Button
+        PowerButton(
+          isActive: provider.isVpnActive,
+          isLoading: provider.isLoading,
+          onTap: provider.blockedAppsCount == 0
+              ? null
+              : () {
+                  if (provider.isVpnActive) {
+                    provider.stopDetox();
+                  } else {
+                    provider.startDetox();
+                  }
+                },
+        ),
+
+        const SizedBox(height: 24),
+
+        // Status Text
+        Text(
+          provider.isVpnActive ? 'Protection Active' : 'Tap to Protect',
+          style: TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            color: provider.isVpnActive
+                ? AppColors.success
+                : AppColors.textPrimary,
+          ),
+        ),
+
+        const SizedBox(height: 8),
+
+        Text(
+          provider.isVpnActive
+              ? '${provider.blockedAppsCount} apps are being blocked'
+              : provider.blockedAppsCount > 0
+                  ? '${provider.blockedAppsCount} apps ready to block'
+                  : 'Select apps to get started',
+          style: const TextStyle(
+            fontSize: 14,
+            color: AppColors.textSecondary,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStatsSection(BuildContext context, DetoxProvider provider) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Row(
         children: [
-          // 1. Background Gradient Mesh
-          Positioned.fill(
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors:
-                      isDark
-                          ? [const Color(0xFF0F172A), const Color(0xFF1E293B)]
-                          : [const Color(0xFFF0FDFA), const Color(0xFFCCFBF1)],
-                ),
-              ),
+          Expanded(
+            child: _StatCard(
+              icon: Icons.apps_rounded,
+              value: '${provider.blockedAppsCount}',
+              label: 'Blocked Apps',
+              gradient: const [AppColors.primaryPurple, AppColors.primaryPurpleLight],
             ),
           ),
-
-          // 2. Ambient Color Blobs
-          Positioned(
-            top: -100,
-            left: -100,
-            child: Container(
-              width: 300,
-              height: 300,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: theme.colorScheme.primary.withValues(alpha: 0.2),
-                boxShadow: [
-                  BoxShadow(
-                    color: theme.colorScheme.primary.withValues(alpha: 0.2),
-                    blurRadius: 100,
-                    spreadRadius: 50,
-                  ),
-                ],
-              ),
-            ),
-          ),
-          Positioned(
-            bottom: -50,
-            right: -50,
-            child: Container(
-              width: 250,
-              height: 250,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: theme.colorScheme.secondary.withValues(alpha: 0.15),
-                boxShadow: [
-                  BoxShadow(
-                    color: theme.colorScheme.secondary.withValues(alpha: 0.15),
-                    blurRadius: 100,
-                    spreadRadius: 50,
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          // 3. Content
-          SafeArea(
-            child: Consumer<DetoxProvider>(
-              builder: (context, provider, child) {
-                return Column(
-                  children: [
-                    // Main Status Card
-                    StatusCard(
-                      isActive: provider.isVpnActive,
-                      blockedAppsCount: provider.blockedAppsCount,
-                    ),
-
-                    // Error Banner
-                    if (provider.errorMessage != null)
-                      _buildErrorBanner(context, provider),
-
-                    // Blocked Apps List or Empty State
-                    Expanded(
-                      child:
-                          provider.blockedAppsCount > 0
-                              ? _buildBlockedAppsList(context, provider)
-                              : _buildEmptyState(context),
-                    ),
-
-                    // Action Button
-                    _buildActionButton(context, provider),
-                  ],
-                );
-              },
+          const SizedBox(width: 12),
+          Expanded(
+            child: _StatCard(
+              icon: Icons.access_time_rounded,
+              value: provider.isVpnActive ? 'Active' : 'Ready',
+              label: 'Status',
+              gradient: provider.isVpnActive
+                  ? const [AppColors.success, AppColors.successLight]
+                  : const [AppColors.primaryCyan, AppColors.primaryBlue],
             ),
           ),
         ],
@@ -161,31 +157,30 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildErrorBanner(BuildContext context, DetoxProvider provider) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+    return GlassCard(
+      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: const Color(0xFFEF4444).withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: const Color(0xFFEF4444).withValues(alpha: 0.3),
-        ),
+      border: Border.all(
+        color: AppColors.error.withValues(alpha: 0.3),
       ),
       child: Row(
         children: [
-          const Icon(Icons.warning_amber_rounded, color: Color(0xFFEF4444)),
+          const Icon(
+            Icons.warning_amber_rounded,
+            color: AppColors.error,
+          ),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
               provider.errorMessage!,
-              style: GoogleFonts.inter(
-                color: const Color(0xFFEF4444),
+              style: const TextStyle(
+                color: AppColors.error,
                 fontWeight: FontWeight.w500,
               ),
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.close, size: 20, color: Color(0xFFEF4444)),
+            icon: const Icon(Icons.close, size: 20, color: AppColors.error),
             onPressed: provider.clearError,
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
@@ -195,259 +190,165 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildBlockedAppsList(BuildContext context, DetoxProvider provider) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
+  Widget _buildBlockedAppsPreview(BuildContext context, DetoxProvider provider) {
+    final appsToShow = provider.blockedApps.take(3).toList();
 
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
-          child: Row(
+    return GlassCard(
+      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'BLOCKED APPS',
-                style: GoogleFonts.outfit(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1.5,
-                  color: isDark ? Colors.white60 : Colors.black54,
+              const Text(
+                'Blocked Apps',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
                 ),
               ),
-              TextButton.icon(
-                onPressed:
-                    () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const AppSelectionScreen(),
-                      ),
-                    ),
-                icon: const Icon(Icons.edit_outlined, size: 16),
-                label: const Text('EDIT LIST'),
-                style: TextButton.styleFrom(
-                  textStyle: GoogleFonts.outfit(
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1.0,
-                  ),
+              Text(
+                'View all →',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: AppColors.primaryCyan,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
             ],
           ),
-        ),
-        Expanded(
-          child: ListView.builder(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            itemCount: provider.blockedApps.length,
-            itemBuilder: (context, index) {
-              final app = provider.blockedApps[index];
-              return Container(
-                margin: const EdgeInsets.only(bottom: 12),
-                decoration: BoxDecoration(
-                  color: theme.cardTheme.color,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color:
-                        isDark
-                            ? Colors.white.withValues(alpha: 0.05)
-                            : Colors.black.withValues(alpha: 0.05),
-                  ),
-                ),
-                child: ListTile(
-                  contentPadding: const EdgeInsets.all(12),
-                  leading: Container(
-                    width: 50,
-                    height: 50,
-                    padding: const EdgeInsets.all(2),
+          const SizedBox(height: 16),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              ...appsToShow.map((app) => Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
                     decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          theme.colorScheme.primary.withValues(alpha: 0.5),
-                          theme.colorScheme.secondary.withValues(alpha: 0.5),
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: ClipRRect(
+                      color: AppColors.surfaceGlass,
                       borderRadius: BorderRadius.circular(12),
-                      child:
-                          app.icon != null
-                              ? Image.memory(app.icon!, fit: BoxFit.cover)
-                              : const Icon(Icons.android, color: Colors.white),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.1),
+                      ),
                     ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: 24,
+                          height: 24,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(6),
+                            color: AppColors.backgroundDarkSecondary,
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(6),
+                            child: app.icon != null
+                                ? Image.memory(app.icon!, fit: BoxFit.cover)
+                                : const Icon(
+                                    Icons.android_rounded,
+                                    size: 16,
+                                    color: AppColors.textSecondary,
+                                  ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          app.appName,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  )),
+              if (provider.blockedAppsCount > 3)
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
                   ),
-                  title: Text(
-                    app.appName,
-                    style: GoogleFonts.inter(fontWeight: FontWeight.w600),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [AppColors.primaryPurple, AppColors.primaryCyan],
+                    ),
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  subtitle: Text(
-                    'Blocking Active',
-                    style: GoogleFonts.inter(
-                      fontSize: 12,
-                      color:
-                          provider.isVpnActive
-                              ? const Color(0xFFEF4444)
-                              : theme.colorScheme.primary,
+                  child: Text(
+                    '+${provider.blockedAppsCount - 3} more',
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: Colors.white,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
-                  trailing: Switch(
-                    value: app.isSelected,
-                    onChanged:
-                        (v) => provider.toggleAppSelection(app.packageName),
-                    activeColor: theme.colorScheme.primary,
-                  ),
                 ),
-              );
-            },
+            ],
           ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildEmptyState(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return Center(
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(30),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Theme.of(
-                  context,
-                ).colorScheme.primary.withValues(alpha: 0.1),
-              ),
-              child: Icon(
-                Icons.app_blocking_outlined,
-                size: 48,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-            ),
-            const SizedBox(height: 24),
-            Text(
-              'No Apps Blocked',
-              style: GoogleFonts.outfit(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: isDark ? Colors.white : const Color(0xFF0F172A),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Select distracting apps to block\nduring your focus sessions.',
-              textAlign: TextAlign.center,
-              style: GoogleFonts.inter(
-                color: isDark ? Colors.white54 : Colors.black54,
-                height: 1.5,
-              ),
-            ),
-            const SizedBox(height: 32),
-            ElevatedButton.icon(
-              onPressed:
-                  () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const AppSelectionScreen(),
-                    ),
-                  ),
-              icon: const Icon(Icons.add_rounded),
-              label: const Text('SELECT APPS'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Theme.of(context).colorScheme.primary,
-                foregroundColor: Colors.white,
-              ),
-            ),
-          ],
-        ),
+        ],
       ),
     );
   }
+}
 
-  Widget _buildActionButton(BuildContext context, DetoxProvider provider) {
-    final isDisabled = provider.isLoading || provider.blockedAppsCount == 0;
-    final isRunning = provider.isVpnActive;
-    final theme = Theme.of(context);
+class _StatCard extends StatelessWidget {
+  final IconData icon;
+  final String value;
+  final String label;
+  final List<Color> gradient;
 
-    return Padding(
-      padding: const EdgeInsets.all(24),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        height: 70,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(24),
-          gradient:
-              isDisabled
-                  ? LinearGradient(
-                    colors: [Colors.grey.shade700, Colors.grey.shade800],
-                  )
-                  : LinearGradient(
-                    colors:
-                        isRunning
-                            ? [const Color(0xFFEF4444), const Color(0xFFDC2626)]
-                            : [
-                              theme.colorScheme.primary,
-                              theme.colorScheme.secondary,
-                            ],
+  const _StatCard({
+    required this.icon,
+    required this.value,
+    required this.label,
+    required this.gradient,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GlassCard(
+      margin: EdgeInsets.zero,
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(colors: gradient),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: Colors.white, size: 22),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  value,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
                   ),
-          boxShadow: [
-            if (!isDisabled)
-              BoxShadow(
-                color:
-                    isRunning
-                        ? const Color(0xFFEF4444).withValues(alpha: 0.5)
-                        : theme.colorScheme.primary.withValues(alpha: 0.5),
-                blurRadius: 20,
-                offset: const Offset(0, 10),
-              ),
-          ],
-        ),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap:
-                isDisabled
-                    ? null
-                    : () =>
-                        isRunning
-                            ? provider.stopDetox()
-                            : provider.startDetox(),
-            borderRadius: BorderRadius.circular(24),
-            child: Center(
-              child:
-                  provider.isLoading
-                      ? const CircularProgressIndicator(color: Colors.white)
-                      : Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            isRunning
-                                ? Icons.stop_rounded
-                                : Icons.play_arrow_rounded,
-                            color: Colors.white,
-                            size: 32,
-                          ),
-                          const SizedBox(width: 12),
-                          Text(
-                            isRunning ? 'STOP SESSION' : 'START DETOX',
-                            style: GoogleFonts.outfit(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: 2,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ],
-                      ),
+                ),
+                Text(
+                  label,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppColors.textTertiary,
+                  ),
+                ),
+              ],
             ),
           ),
-        ),
+        ],
       ),
     );
   }
