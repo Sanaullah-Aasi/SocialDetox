@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'app_colors.dart';
 
+/// Project Zenith - Cybernetic Theme System
 class AppTheme {
   AppTheme._();
 
@@ -10,126 +11,139 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
-      scaffoldBackgroundColor: AppColors.backgroundDark,
+      scaffoldBackgroundColor: AppColors.obsidianBase,
 
-      // Color Scheme
+      // Color Scheme - Zenith Palette
       colorScheme: const ColorScheme.dark(
-        primary: AppColors.primaryPurple,
-        secondary: AppColors.primaryCyan,
-        surface: AppColors.backgroundDarkSecondary,
-        error: AppColors.error,
+        primary: AppColors.electricIndigo,
+        secondary: AppColors.bioluminescentMint,
+        surface: AppColors.elevatedSurface,
+        error: AppColors.coralWarning,
         onPrimary: Colors.white,
         onSecondary: Colors.white,
-        onSurface: AppColors.textPrimary,
+        onSurface: AppColors.stardust,
         onError: Colors.white,
       ),
 
-      // Typography
-      textTheme: GoogleFonts.poppinsTextTheme(
+      // Typography - Plus Jakarta Sans
+      textTheme: GoogleFonts.plusJakartaSansTextTheme(
         const TextTheme(
           displayLarge: TextStyle(
             fontSize: 32,
-            fontWeight: FontWeight.bold,
-            color: AppColors.textPrimary,
+            fontWeight: FontWeight.w700,
+            color: AppColors.stardust,
             letterSpacing: -0.5,
+            height: 1.2,
           ),
           displayMedium: TextStyle(
             fontSize: 28,
-            fontWeight: FontWeight.bold,
-            color: AppColors.textPrimary,
+            fontWeight: FontWeight.w700,
+            color: AppColors.stardust,
             letterSpacing: -0.5,
+            height: 1.2,
           ),
           displaySmall: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
+            color: AppColors.stardust,
+            height: 1.3,
           ),
           headlineMedium: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
+            color: AppColors.stardust,
+            height: 1.3,
           ),
           headlineSmall: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
+            color: AppColors.stardust,
+            height: 1.4,
           ),
           titleLarge: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
+            color: AppColors.stardust,
+            height: 1.4,
           ),
           titleMedium: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w500,
-            color: AppColors.textPrimary,
+            color: AppColors.stardust,
+            height: 1.4,
           ),
           bodyLarge: TextStyle(
             fontSize: 16,
-            fontWeight: FontWeight.normal,
-            color: AppColors.textPrimary,
+            fontWeight: FontWeight.w400,
+            color: AppColors.stardust,
+            height: 1.5,
           ),
           bodyMedium: TextStyle(
             fontSize: 14,
-            fontWeight: FontWeight.normal,
-            color: AppColors.textSecondary,
+            fontWeight: FontWeight.w400,
+            height: 1.5,
           ),
           bodySmall: TextStyle(
             fontSize: 12,
-            fontWeight: FontWeight.normal,
-            color: AppColors.textTertiary,
+            fontWeight: FontWeight.w400,
+            height: 1.5,
           ),
           labelLarge: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
-            letterSpacing: 1.2,
+            color: AppColors.stardust,
+            letterSpacing: 0.5,
           ),
         ),
       ),
 
-      // App Bar
+      // App Bar - Minimal Zenith
       appBarTheme: AppBarTheme(
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
-        systemOverlayStyle: SystemUiOverlayStyle.light,
-        titleTextStyle: GoogleFonts.poppins(
+        systemOverlayStyle: const SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.light,
+          systemNavigationBarColor: AppColors.obsidianBase,
+          systemNavigationBarIconBrightness: Brightness.light,
+        ),
+        titleTextStyle: GoogleFonts.plusJakartaSans(
           fontSize: 20,
           fontWeight: FontWeight.w600,
-          color: AppColors.textPrimary,
+          color: AppColors.stardust,
         ),
         iconTheme: const IconThemeData(
-          color: AppColors.textPrimary,
+          color: AppColors.stardust,
           size: 24,
         ),
       ),
 
-      // Card Theme
+      // Card Theme - Elevated Surface with subtle border
       cardTheme: CardTheme(
-        color: AppColors.surfaceGlass,
+        color: AppColors.elevatedSurface,
         elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(16),
           side: BorderSide(
-            color: Colors.white.withValues(alpha: 0.1),
+            color: AppColors.cardBorder,
             width: 1,
           ),
         ),
       ),
 
-      // Elevated Button
+      // Elevated Button - Zenith Style
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primaryPurple,
+          backgroundColor: AppColors.electricIndigo,
           foregroundColor: Colors.white,
           elevation: 0,
-          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(12),
           ),
-          textStyle: GoogleFonts.poppins(
-            fontSize: 16,
+          textStyle: GoogleFonts.plusJakartaSans(
+            fontSize: 15,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -138,46 +152,44 @@ class AppTheme {
       // Text Button
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: AppColors.primaryCyan,
-          textStyle: GoogleFonts.poppins(
+          foregroundColor: AppColors.bioluminescentMint,
+          textStyle: GoogleFonts.plusJakartaSans(
             fontSize: 14,
             fontWeight: FontWeight.w600,
           ),
         ),
       ),
 
-      // Input Decoration
+      // Input Decoration - Zenith Fields
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: AppColors.surfaceGlass,
+        fillColor: AppColors.elevatedSurface,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide.none,
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: AppColors.cardBorder),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(
-            color: Colors.white.withValues(alpha: 0.1),
-          ),
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: AppColors.cardBorder),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(
-            color: AppColors.primaryPurple,
+            color: AppColors.electricIndigo,
             width: 2,
           ),
         ),
         contentPadding: const EdgeInsets.symmetric(
-          horizontal: 20,
-          vertical: 16,
+          horizontal: 16,
+          vertical: 14,
         ),
-        hintStyle: GoogleFonts.poppins(
+        hintStyle: GoogleFonts.plusJakartaSans(
           color: AppColors.textTertiary,
           fontSize: 14,
         ),
       ),
 
-      // Switch Theme
+      // Switch Theme - Zenith Toggle
       switchTheme: SwitchThemeData(
         thumbColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
@@ -187,20 +199,18 @@ class AppTheme {
         }),
         trackColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return AppColors.primaryPurple;
+            return AppColors.bioluminescentMint;
           }
-          return AppColors.surfaceGlass;
+          return AppColors.zinc700;
         }),
-        trackOutlineColor: WidgetStateProperty.resolveWith((states) {
-          return Colors.transparent;
-        }),
+        trackOutlineColor: WidgetStateProperty.all(Colors.transparent),
       ),
 
       // Bottom Navigation
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        selectedItemColor: AppColors.primaryCyan,
+        selectedItemColor: AppColors.bioluminescentMint,
         unselectedItemColor: AppColors.textTertiary,
         type: BottomNavigationBarType.fixed,
         showSelectedLabels: true,
@@ -209,21 +219,21 @@ class AppTheme {
 
       // Divider
       dividerTheme: DividerThemeData(
-        color: Colors.white.withValues(alpha: 0.1),
+        color: AppColors.cardBorder,
         thickness: 1,
       ),
 
       // Icon Theme
       iconTheme: const IconThemeData(
-        color: AppColors.textPrimary,
+        color: AppColors.stardust,
         size: 24,
       ),
 
-      // Snackbar
+      // Snackbar - Zenith Toast
       snackBarTheme: SnackBarThemeData(
-        backgroundColor: AppColors.backgroundDarkTertiary,
-        contentTextStyle: GoogleFonts.poppins(
-          color: AppColors.textPrimary,
+        backgroundColor: AppColors.zinc800,
+        contentTextStyle: GoogleFonts.plusJakartaSans(
+          color: AppColors.stardust,
           fontSize: 14,
         ),
         shape: RoundedRectangleBorder(

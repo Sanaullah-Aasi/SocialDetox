@@ -1,7 +1,10 @@
-import 'package:flutter/material.dart';
 import 'dart:math' as math;
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../theme/app_colors.dart';
 
+/// Project Zenith - Liquid Core Power Button
+/// A breathing, organic blob with 80px blur shadow
 class PowerButton extends StatefulWidget {
   final bool isActive;
   final bool isLoading;
@@ -22,263 +25,278 @@ class PowerButton extends StatefulWidget {
 
 class _PowerButtonState extends State<PowerButton>
     with TickerProviderStateMixin {
-  late AnimationController _pulseController;
-  late AnimationController _rotateController;
-  late AnimationController _scaleController;
-  late Animation<double> _pulseAnimation;
-  late Animation<double> _scaleAnimation;
+  late AnimationController _breathController;
+  late AnimationController _morphController;
+  late AnimationController _tapController;
+  late Animation<double> _breathAnimation;
+  late Animation<double> _tapAnimation;
 
   @override
   void initState() {
     super.initState();
 
-    _pulseController = AnimationController(
-      duration: const Duration(seconds: 2),
+    // Breathing animation - slow organic pulse
+    _breathController = AnimationController(
       vsync: this,
-    )..repeat(reverse: true);
+      duration: const Duration(milliseconds: 3000),
+    );
 
-    _rotateController = AnimationController(
-      duration: const Duration(seconds: 10),
+    _breathAnimation = Tween<double>(begin: 0.96, end: 1.04).animate(
+      CurvedAnimation(
+        parent: _breathController,
+        curve: Curves.easeInOutSine,
+      ),
+    );
+
+    // Morph animation for blob effect
+    _morphController = AnimationController(
       vsync: this,
+      duration: const Duration(seconds: 8),
     )..repeat();
 
-    _scaleController = AnimationController(
-      duration: const Duration(milliseconds: 150),
+    // Tap scale animation
+    _tapController = AnimationController(
       vsync: this,
+      duration: const Duration(milliseconds: 150),
     );
 
-    _pulseAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+    _tapAnimation = Tween<double>(begin: 1.0, end: 0.92).animate(
+      CurvedAnimation(
+        parent: _tapController,
+        curve: Curves.easeOutCubic,
+      ),
     );
 
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
-      CurvedAnimation(parent: _scaleController, curve: Curves.easeInOut),
-    );
+    _breathController.repeat(reverse: true);
   }
 
   @override
   void dispose() {
-    _pulseController.dispose();
-    _rotateController.dispose();
-    _scaleController.dispose();
+    _breathController.dispose();
+    _morphController.dispose();
+    _tapController.dispose();
     super.dispose();
   }
 
   void _handleTapDown(TapDownDetails details) {
-    _scaleController.forward();
+    _tapController.forward();
+    HapticFeedback.lightImpact();
   }
 
   void _handleTapUp(TapUpDetails details) {
-    _scaleController.reverse();
+    _tapController.reverse();
+    if (!widget.isLoading && widget.onTap != null) {
+      HapticFeedback.heavyImpact();
+      widget.onTap!();
+    }
   }
 
   void _handleTapCancel() {
-    _scaleController.reverse();
+    _tapController.reverse();
   }
 
   @override
   Widget build(BuildContext context) {
-    final Color activeColor = AppColors.success;
-    final Color inactiveColor = AppColors.primaryPurple;
-    final Color currentColor = widget.isActive ? activeColor : inactiveColor;
+    final buttonSize = widget.size * 0.65;
+    final glowColor = widget.isActive
+        ? AppColors.bioluminescentMint
+        : AppColors.electricIndigo;
 
-    return GestureDetector(
-      onTapDown: _handleTapDown,
-      onTapUp: _handleTapUp,
-      onTapCancel: _handleTapCancel,
-      onTap: widget.isLoading ? null : widget.onTap,
-      child: AnimatedBuilder(
-        animation: Listenable.merge([
-          _pulseAnimation,
-          _rotateController,
-          _scaleAnimation,
-        ]),
-        builder: (context, child) {
-          return Transform.scale(
-            scale: _scaleAnimation.value,
-            child: SizedBox(
-              width: widget.size + 60,
-              height: widget.size + 60,
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  // Outer glow effect
-                  Container(
-                    width: widget.size + 40,
-                    height: widget.size + 40,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: currentColor.withValues(
-                            alpha: 0.3 + (_pulseAnimation.value * 0.2),
+    return SizedBox(
+      width: widget.size,
+      height: widget.size,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          // 80px blur shadow layer
+          AnimatedBuilder(
+            animation: _breathAnimation,
+            builder: (context, child) {
+              return Container(
+                width: buttonSize * _breathAnimation.value,
+                height: buttonSize * _breathAnimation.value,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: glowColor.withValues(alpha: widget.isActive ? 0.6 : 0.4),
+                      blurRadius: 80,
+                      spreadRadius: 0,
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+
+          // Liquid blob outer ring
+          AnimatedBuilder(
+            animation: Listenable.merge([_morphController, _breathAnimation]),
+            builder: (context, child) {
+              return CustomPaint(
+                size: Size(widget.size, widget.size),
+                painter: _LiquidBlobPainter(
+                  morphValue: _morphController.value,
+                  scaleValue: _breathAnimation.value,
+                  color: glowColor.withValues(alpha: 0.15),
+                  isActive: widget.isActive,
+                ),
+              );
+            },
+          ),
+
+          // Inner liquid ring
+          AnimatedBuilder(
+            animation: Listenable.merge([_morphController, _breathAnimation]),
+            builder: (context, child) {
+              return CustomPaint(
+                size: Size(widget.size * 0.85, widget.size * 0.85),
+                painter: _LiquidBlobPainter(
+                  morphValue: _morphController.value + 0.25,
+                  scaleValue: _breathAnimation.value * 0.98,
+                  color: glowColor.withValues(alpha: 0.1),
+                  isActive: widget.isActive,
+                  invert: true,
+                ),
+              );
+            },
+          ),
+
+          // Main button
+          GestureDetector(
+            onTapDown: _handleTapDown,
+            onTapUp: _handleTapUp,
+            onTapCancel: _handleTapCancel,
+            child: AnimatedBuilder(
+              animation: Listenable.merge([_breathAnimation, _tapAnimation]),
+              builder: (context, child) {
+                final scale = _breathAnimation.value * _tapAnimation.value;
+                return Transform.scale(
+                  scale: scale,
+                  child: child,
+                );
+              },
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 400),
+                curve: Curves.easeOutCubic,
+                width: buttonSize,
+                height: buttonSize,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: RadialGradient(
+                    center: const Alignment(-0.3, -0.3),
+                    radius: 1.0,
+                    colors: widget.isActive
+                        ? [
+                            AppColors.bioluminescentMint,
+                            AppColors.bioluminescentMint.withValues(alpha: 0.8),
+                            const Color(0xFF059669),
+                          ]
+                        : [
+                            AppColors.electricIndigo,
+                            AppColors.electricIndigo.withValues(alpha: 0.85),
+                            const Color(0xFF3730A3),
+                          ],
+                    stops: const [0.0, 0.5, 1.0],
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: glowColor.withValues(alpha: 0.5),
+                      blurRadius: 30,
+                      spreadRadius: 0,
+                    ),
+                    BoxShadow(
+                      color: glowColor.withValues(alpha: 0.3),
+                      blurRadius: 60,
+                      spreadRadius: 5,
+                    ),
+                  ],
+                ),
+                child: Center(
+                  child: widget.isLoading
+                      ? SizedBox(
+                          width: buttonSize * 0.3,
+                          height: buttonSize * 0.3,
+                          child: const CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 3,
                           ),
-                          blurRadius: 40 + (_pulseAnimation.value * 20),
-                          spreadRadius: 5,
+                        )
+                      : Icon(
+                          Icons.power_settings_new_rounded,
+                          size: buttonSize * 0.4,
+                          color: Colors.white,
                         ),
-                      ],
-                    ),
-                  ),
-
-                  // Rotating outer ring
-                  Transform.rotate(
-                    angle: _rotateController.value * 2 * math.pi,
-                    child: CustomPaint(
-                      size: Size(widget.size + 30, widget.size + 30),
-                      painter: _DashedCirclePainter(
-                        color: currentColor.withValues(alpha: 0.3),
-                        strokeWidth: 2,
-                        dashLength: 8,
-                        gapLength: 12,
-                      ),
-                    ),
-                  ),
-
-                  // Second rotating ring (opposite direction)
-                  Transform.rotate(
-                    angle: -_rotateController.value * 2 * math.pi * 0.7,
-                    child: CustomPaint(
-                      size: Size(widget.size + 50, widget.size + 50),
-                      painter: _DashedCirclePainter(
-                        color: currentColor.withValues(alpha: 0.15),
-                        strokeWidth: 1,
-                        dashLength: 4,
-                        gapLength: 8,
-                      ),
-                    ),
-                  ),
-
-                  // Main button
-                  Container(
-                    width: widget.size,
-                    height: widget.size,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: widget.isActive
-                            ? [
-                                AppColors.success,
-                                AppColors.successLight,
-                              ]
-                            : [
-                                AppColors.primaryPurple,
-                                AppColors.primaryCyan,
-                              ],
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: currentColor.withValues(alpha: 0.5),
-                          blurRadius: 30,
-                          offset: const Offset(0, 10),
-                        ),
-                      ],
-                    ),
-                    child: Container(
-                      margin: const EdgeInsets.all(6),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: AppColors.backgroundDark.withValues(alpha: 0.3),
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.2),
-                          width: 2,
-                        ),
-                      ),
-                      child: Center(
-                        child: widget.isLoading
-                            ? SizedBox(
-                                width: widget.size * 0.3,
-                                height: widget.size * 0.3,
-                                child: const CircularProgressIndicator(
-                                  color: Colors.white,
-                                  strokeWidth: 3,
-                                ),
-                              )
-                            : Icon(
-                                Icons.power_settings_new_rounded,
-                                size: widget.size * 0.4,
-                                color: Colors.white,
-                              ),
-                      ),
-                    ),
-                  ),
-
-                  // Animated dot indicators
-                  if (widget.isActive) ..._buildActiveIndicators(currentColor),
-                ],
+                ),
               ),
             ),
-          );
-        },
+          ),
+        ],
       ),
     );
   }
-
-  List<Widget> _buildActiveIndicators(Color color) {
-    return List.generate(4, (index) {
-      final angle = (index * math.pi / 2) + (_rotateController.value * 2 * math.pi);
-      final radius = (widget.size / 2) + 20;
-      return Positioned(
-        left: (widget.size + 60) / 2 + radius * math.cos(angle) - 4,
-        top: (widget.size + 60) / 2 + radius * math.sin(angle) - 4,
-        child: Container(
-          width: 8,
-          height: 8,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: color,
-            boxShadow: [
-              BoxShadow(
-                color: color,
-                blurRadius: 8,
-              ),
-            ],
-          ),
-        ),
-      );
-    });
-  }
 }
 
-class _DashedCirclePainter extends CustomPainter {
+/// Custom painter for liquid blob effect
+class _LiquidBlobPainter extends CustomPainter {
+  final double morphValue;
+  final double scaleValue;
   final Color color;
-  final double strokeWidth;
-  final double dashLength;
-  final double gapLength;
+  final bool isActive;
+  final bool invert;
 
-  _DashedCirclePainter({
+  _LiquidBlobPainter({
+    required this.morphValue,
+    required this.scaleValue,
     required this.color,
-    required this.strokeWidth,
-    required this.dashLength,
-    required this.gapLength,
+    required this.isActive,
+    this.invert = false,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
       ..color = color
-      ..strokeWidth = strokeWidth
-      ..style = PaintingStyle.stroke;
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2;
 
     final center = Offset(size.width / 2, size.height / 2);
-    final radius = size.width / 2;
-    final circumference = 2 * math.pi * radius;
-    final dashCount = (circumference / (dashLength + gapLength)).floor();
+    final baseRadius = (size.width / 2) * scaleValue;
 
-    for (int i = 0; i < dashCount; i++) {
-      final startAngle = (i * (dashLength + gapLength)) / radius;
-      final sweepAngle = dashLength / radius;
-      canvas.drawArc(
-        Rect.fromCircle(center: center, radius: radius),
-        startAngle,
-        sweepAngle,
-        false,
-        paint,
-      );
+    final path = Path();
+    const points = 120;
+    final direction = invert ? -1.0 : 1.0;
+
+    for (int i = 0; i <= points; i++) {
+      final angle = (i / points) * 2 * math.pi;
+      
+      // Multiple sine waves for organic feel
+      final wave1 = math.sin(angle * 3 + morphValue * 2 * math.pi * direction) * 4;
+      final wave2 = math.sin(angle * 5 - morphValue * 2 * math.pi * 0.7 * direction) * 2;
+      final wave3 = math.cos(angle * 2 + morphValue * 2 * math.pi * 0.5 * direction) * 3;
+      
+      final radiusOffset = wave1 + wave2 + wave3;
+      final radius = baseRadius + radiusOffset;
+
+      final x = center.dx + radius * math.cos(angle);
+      final y = center.dy + radius * math.sin(angle);
+
+      if (i == 0) {
+        path.moveTo(x, y);
+      } else {
+        path.lineTo(x, y);
+      }
     }
+
+    path.close();
+    canvas.drawPath(path, paint);
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant _LiquidBlobPainter oldDelegate) {
+    return morphValue != oldDelegate.morphValue ||
+        scaleValue != oldDelegate.scaleValue ||
+        color != oldDelegate.color ||
+        isActive != oldDelegate.isActive;
+  }
 }

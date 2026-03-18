@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../providers/detox_provider.dart';
 import '../theme/app_colors.dart';
 import '../widgets/app_tile.dart';
-import '../widgets/glass_card.dart';
+import '../widgets/bouncing_card.dart';
 
+/// Project Zenith - Apps Screen
 class AppsScreen extends StatefulWidget {
   const AppsScreen({super.key});
 
@@ -62,30 +64,35 @@ class _AppsScreenState extends State<AppsScreen> {
           const Text(
             'Select Apps',
             style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
+              fontSize: 22,
+              fontWeight: FontWeight.w700,
+              color: AppColors.stardust,
+              letterSpacing: -0.5,
             ),
           ),
           Consumer<DetoxProvider>(
             builder: (context, provider, _) {
               return PopupMenuButton<String>(
                 icon: Container(
-                  padding: const EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: AppColors.surfaceGlass,
+                    color: AppColors.elevatedSurface,
                     borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppColors.cardBorder),
                   ),
                   child: const Icon(
                     Icons.more_vert_rounded,
-                    color: AppColors.textPrimary,
+                    color: AppColors.stardust,
+                    size: 20,
                   ),
                 ),
-                color: AppColors.backgroundDarkSecondary,
+                color: AppColors.zinc800,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(color: AppColors.cardBorder),
                 ),
                 onSelected: (value) {
+                  HapticFeedback.mediumImpact();
                   if (value == 'select_all') {
                     provider.selectAllApps();
                   } else if (value == 'deselect_all') {
@@ -97,15 +104,15 @@ class _AppsScreenState extends State<AppsScreen> {
                     value: 'select_all',
                     child: Row(
                       children: [
-                        const Icon(
-                          Icons.check_box_rounded,
-                          color: AppColors.primaryCyan,
-                          size: 20,
+                        Icon(
+                          Icons.lock_rounded,
+                          color: AppColors.coralWarning,
+                          size: 18,
                         ),
                         const SizedBox(width: 12),
                         const Text(
-                          'Select All',
-                          style: TextStyle(color: AppColors.textPrimary),
+                          'Block All',
+                          style: TextStyle(color: AppColors.stardust),
                         ),
                       ],
                     ),
@@ -114,15 +121,15 @@ class _AppsScreenState extends State<AppsScreen> {
                     value: 'deselect_all',
                     child: Row(
                       children: [
-                        const Icon(
-                          Icons.check_box_outline_blank_rounded,
-                          color: AppColors.error,
-                          size: 20,
+                        Icon(
+                          Icons.lock_open_rounded,
+                          color: AppColors.bioluminescentMint,
+                          size: 18,
                         ),
                         const SizedBox(width: 12),
                         const Text(
-                          'Deselect All',
-                          style: TextStyle(color: AppColors.textPrimary),
+                          'Unblock All',
+                          style: TextStyle(color: AppColors.stardust),
                         ),
                       ],
                     ),
@@ -141,28 +148,31 @@ class _AppsScreenState extends State<AppsScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Container(
         decoration: BoxDecoration(
-          gradient: AppColors.glassGradient,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: Colors.white.withValues(alpha: 0.1),
-          ),
+          color: AppColors.elevatedSurface,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: AppColors.cardBorder),
         ),
         child: TextField(
           controller: _searchController,
           onChanged: (value) => setState(() => _searchQuery = value.toLowerCase()),
-          style: const TextStyle(color: AppColors.textPrimary),
+          style: const TextStyle(color: AppColors.stardust, fontSize: 15),
           decoration: InputDecoration(
             hintText: 'Search apps...',
-            hintStyle: const TextStyle(color: AppColors.textTertiary),
+            hintStyle: const TextStyle(
+              color: AppColors.textTertiary,
+              fontSize: 15,
+            ),
             prefixIcon: const Icon(
               Icons.search_rounded,
               color: AppColors.textSecondary,
+              size: 22,
             ),
             suffixIcon: _searchQuery.isNotEmpty
                 ? IconButton(
                     icon: const Icon(
                       Icons.close_rounded,
                       color: AppColors.textSecondary,
+                      size: 20,
                     ),
                     onPressed: () {
                       _searchController.clear();
@@ -172,8 +182,8 @@ class _AppsScreenState extends State<AppsScreen> {
                 : null,
             border: InputBorder.none,
             contentPadding: const EdgeInsets.symmetric(
-              horizontal: 20,
-              vertical: 16,
+              horizontal: 16,
+              vertical: 14,
             ),
           ),
         ),
@@ -184,29 +194,22 @@ class _AppsScreenState extends State<AppsScreen> {
   Widget _buildSelectionSummary() {
     return Consumer<DetoxProvider>(
       builder: (context, provider, _) {
-        return GlassCard(
+        return BouncingCard(
           margin: const EdgeInsets.symmetric(horizontal: 20),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              AppColors.primaryPurple.withValues(alpha: 0.15),
-              AppColors.primaryCyan.withValues(alpha: 0.08),
-            ],
-          ),
-          border: Border.all(
-            color: AppColors.primaryPurple.withValues(alpha: 0.3),
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          backgroundColor: AppColors.coralWarning.withValues(alpha: 0.08),
           child: Row(
             children: [
-              ShaderMask(
-                shaderCallback: (bounds) => const LinearGradient(
-                  colors: [AppColors.primaryPurple, AppColors.primaryCyan],
-                ).createShader(bounds),
-                child: const Icon(
-                  Icons.checklist_rounded,
-                  color: Colors.white,
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppColors.coralWarning.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(
+                  Icons.block_rounded,
+                  color: AppColors.coralWarning,
+                  size: 20,
                 ),
               ),
               const SizedBox(width: 12),
@@ -217,16 +220,16 @@ class _AppsScreenState extends State<AppsScreen> {
                       TextSpan(
                         text: '${provider.blockedAppsCount} ',
                         style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                          color: AppColors.textPrimary,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 15,
+                          color: AppColors.stardust,
                         ),
                       ),
                       TextSpan(
-                        text: 'of ${provider.installedApps.length} apps selected',
+                        text: 'of ${provider.installedApps.length} apps blocked',
                         style: const TextStyle(
                           color: AppColors.textSecondary,
-                          fontSize: 14,
+                          fontSize: 13,
                         ),
                       ),
                     ],
@@ -234,13 +237,27 @@ class _AppsScreenState extends State<AppsScreen> {
                 ),
               ),
               if (provider.blockedAppsCount > 0)
-                TextButton(
-                  onPressed: provider.deselectAllApps,
-                  child: const Text(
-                    'Clear',
-                    style: TextStyle(
-                      color: AppColors.error,
-                      fontWeight: FontWeight.w600,
+                GestureDetector(
+                  onTap: () {
+                    HapticFeedback.mediumImpact();
+                    provider.deselectAllApps();
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.bioluminescentMint.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: const Text(
+                      'Clear',
+                      style: TextStyle(
+                        color: AppColors.bioluminescentMint,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 12,
+                      ),
                     ),
                   ),
                 ),
@@ -255,9 +272,27 @@ class _AppsScreenState extends State<AppsScreen> {
     return Consumer<DetoxProvider>(
       builder: (context, provider, child) {
         if (provider.isLoading) {
-          return const Center(
-            child: CircularProgressIndicator(
-              color: AppColors.primaryPurple,
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SizedBox(
+                  width: 40,
+                  height: 40,
+                  child: CircularProgressIndicator(
+                    color: AppColors.electricIndigo,
+                    strokeWidth: 3,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Loading apps...',
+                  style: TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
             ),
           );
         }
@@ -272,17 +307,33 @@ class _AppsScreenState extends State<AppsScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  Icons.search_off_rounded,
-                  size: 64,
-                  color: AppColors.textTertiary.withValues(alpha: 0.5),
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: AppColors.zinc800,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.search_off_rounded,
+                    size: 40,
+                    color: AppColors.textTertiary,
+                  ),
                 ),
                 const SizedBox(height: 16),
                 const Text(
                   'No apps found',
                   style: TextStyle(
-                    fontSize: 18,
-                    color: AppColors.textSecondary,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.stardust,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                const Text(
+                  'Try a different search term',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: AppColors.textTertiary,
                   ),
                 ),
               ],

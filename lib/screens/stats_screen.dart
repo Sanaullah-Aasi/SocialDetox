@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/detox_provider.dart';
 import '../theme/app_colors.dart';
-import '../widgets/glass_card.dart';
+import '../widgets/bouncing_card.dart';
 
+/// Project Zenith - Stats Screen
 class StatsScreen extends StatelessWidget {
   const StatsScreen({super.key});
 
@@ -55,57 +56,41 @@ class StatsScreen extends StatelessWidget {
       child: Text(
         'Statistics',
         style: TextStyle(
-          fontSize: 24,
-          fontWeight: FontWeight.bold,
-          color: AppColors.textPrimary,
+          fontSize: 22,
+          fontWeight: FontWeight.w700,
+          color: AppColors.stardust,
+          letterSpacing: -0.5,
         ),
       ),
     );
   }
 
   Widget _buildStatusCard(DetoxProvider provider) {
-    return GlassCard(
-      gradient: LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: provider.isVpnActive
-            ? [
-                AppColors.success.withValues(alpha: 0.2),
-                AppColors.successLight.withValues(alpha: 0.1),
-              ]
-            : [
-                AppColors.primaryPurple.withValues(alpha: 0.2),
-                AppColors.primaryCyan.withValues(alpha: 0.1),
-              ],
-      ),
-      border: Border.all(
-        color: provider.isVpnActive
-            ? AppColors.success.withValues(alpha: 0.3)
-            : AppColors.primaryPurple.withValues(alpha: 0.3),
-      ),
+    return BouncingCard(
+      backgroundColor: provider.isVpnActive
+          ? AppColors.bioluminescentMint.withValues(alpha: 0.1)
+          : AppColors.electricIndigo.withValues(alpha: 0.1),
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(14),
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              gradient: provider.isVpnActive
-                  ? const LinearGradient(
-                      colors: [AppColors.success, AppColors.successLight],
-                    )
-                  : const LinearGradient(
-                      colors: [AppColors.primaryPurple, AppColors.primaryCyan],
-                    ),
-              borderRadius: BorderRadius.circular(16),
+              color: provider.isVpnActive
+                  ? AppColors.bioluminescentMint.withValues(alpha: 0.2)
+                  : AppColors.electricIndigo.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(14),
             ),
             child: Icon(
               provider.isVpnActive
                   ? Icons.shield_rounded
                   : Icons.shield_outlined,
-              color: Colors.white,
-              size: 28,
+              color: provider.isVpnActive
+                  ? AppColors.bioluminescentMint
+                  : AppColors.electricIndigo,
+              size: 26,
             ),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -113,11 +98,11 @@ class StatsScreen extends StatelessWidget {
                 Text(
                   provider.isVpnActive ? 'Protection Active' : 'Protection Off',
                   style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
                     color: provider.isVpnActive
-                        ? AppColors.success
-                        : AppColors.textPrimary,
+                        ? AppColors.bioluminescentMint
+                        : AppColors.stardust,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -126,7 +111,7 @@ class StatsScreen extends StatelessWidget {
                       ? 'Blocking ${provider.blockedAppsCount} apps'
                       : 'Tap power button to start',
                   style: const TextStyle(
-                    fontSize: 13,
+                    fontSize: 12,
                     color: AppColors.textSecondary,
                   ),
                 ),
@@ -134,16 +119,18 @@ class StatsScreen extends StatelessWidget {
             ),
           ),
           Container(
-            width: 12,
-            height: 12,
+            width: 10,
+            height: 10,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: provider.isVpnActive ? AppColors.success : AppColors.textTertiary,
+              color: provider.isVpnActive
+                  ? AppColors.bioluminescentMint
+                  : AppColors.textTertiary,
               boxShadow: provider.isVpnActive
                   ? [
                       BoxShadow(
-                        color: AppColors.success.withValues(alpha: 0.5),
-                        blurRadius: 8,
+                        color: AppColors.bioluminescentMint.withValues(alpha: 0.6),
+                        blurRadius: 10,
                       ),
                     ]
                   : null,
@@ -163,10 +150,10 @@ class StatsScreen extends StatelessWidget {
             children: [
               Expanded(
                 child: _StatBox(
-                  icon: Icons.apps_rounded,
+                  icon: Icons.block_rounded,
                   value: '${provider.blockedAppsCount}',
                   label: 'Blocked Apps',
-                  colors: const [AppColors.primaryPurple, AppColors.primaryPurpleLight],
+                  color: AppColors.coralWarning,
                 ),
               ),
               const SizedBox(width: 12),
@@ -175,7 +162,7 @@ class StatsScreen extends StatelessWidget {
                   icon: Icons.smartphone_rounded,
                   value: '${provider.installedApps.length}',
                   label: 'Total Apps',
-                  colors: const [AppColors.primaryCyan, AppColors.primaryBlue],
+                  color: AppColors.electricIndigo,
                 ),
               ),
             ],
@@ -188,9 +175,9 @@ class StatsScreen extends StatelessWidget {
                   icon: Icons.timer_rounded,
                   value: provider.isVpnActive ? 'Active' : 'Idle',
                   label: 'Current Status',
-                  colors: provider.isVpnActive
-                      ? const [AppColors.success, AppColors.successLight]
-                      : const [Color(0xFF636E72), Color(0xFF95A5A6)],
+                  color: provider.isVpnActive
+                      ? AppColors.bioluminescentMint
+                      : AppColors.textTertiary,
                 ),
               ),
               const SizedBox(width: 12),
@@ -199,7 +186,7 @@ class StatsScreen extends StatelessWidget {
                   icon: Icons.trending_up_rounded,
                   value: '100%',
                   label: 'Focus Rate',
-                  colors: const [AppColors.warning, Color(0xFFFFBE76)],
+                  color: AppColors.amber,
                 ),
               ),
             ],
@@ -218,14 +205,14 @@ class StatsScreen extends StatelessWidget {
           child: Text(
             'Recent Activity',
             style: TextStyle(
-              fontSize: 18,
+              fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
+              color: AppColors.stardust,
             ),
           ),
         ),
         const SizedBox(height: 12),
-        GlassCard(
+        BouncingCard(
           child: Column(
             children: [
               _ActivityItem(
@@ -235,20 +222,14 @@ class StatsScreen extends StatelessWidget {
                 time: 'Now',
                 isActive: true,
               ),
-              Divider(
-                color: Colors.white.withValues(alpha: 0.1),
-                height: 24,
-              ),
+              Divider(color: AppColors.cardBorder, height: 20),
               _ActivityItem(
                 icon: Icons.add_circle_outline_rounded,
                 title: 'Apps Selected',
                 subtitle: 'Added apps to block list',
                 time: 'Today',
               ),
-              Divider(
-                color: Colors.white.withValues(alpha: 0.1),
-                height: 24,
-              ),
+              Divider(color: AppColors.cardBorder, height: 20),
               _ActivityItem(
                 icon: Icons.download_rounded,
                 title: 'App Installed',
@@ -271,15 +252,15 @@ class StatsScreen extends StatelessWidget {
           child: Text(
             'Focus Tips',
             style: TextStyle(
-              fontSize: 18,
+              fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
+              color: AppColors.stardust,
             ),
           ),
         ),
         const SizedBox(height: 12),
         SizedBox(
-          height: 120,
+          height: 110,
           child: ListView(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -287,17 +268,17 @@ class StatsScreen extends StatelessWidget {
               _TipCard(
                 icon: Icons.notifications_off_rounded,
                 title: 'Disable Notifications',
-                gradient: const [AppColors.primaryPurple, AppColors.primaryCyan],
+                color: AppColors.electricIndigo,
               ),
               _TipCard(
                 icon: Icons.schedule_rounded,
                 title: 'Set a Schedule',
-                gradient: const [AppColors.success, AppColors.successLight],
+                color: AppColors.bioluminescentMint,
               ),
               _TipCard(
                 icon: Icons.psychology_rounded,
                 title: 'Take Breaks',
-                gradient: const [AppColors.warning, Color(0xFFFFBE76)],
+                color: AppColors.amber,
               ),
             ],
           ),
@@ -311,46 +292,47 @@ class _StatBox extends StatelessWidget {
   final IconData icon;
   final String value;
   final String label;
-  final List<Color> colors;
+  final Color color;
 
   const _StatBox({
     required this.icon,
     required this.value,
     required this.label,
-    required this.colors,
+    required this.color,
   });
 
   @override
   Widget build(BuildContext context) {
-    return GlassCard(
+    return BouncingCard(
       margin: EdgeInsets.zero,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              gradient: LinearGradient(colors: colors),
+              color: color.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(icon, color: Colors.white, size: 20),
+            child: Icon(icon, color: color, size: 18),
           ),
           const SizedBox(height: 12),
           Text(
             value,
             style: const TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
+              fontSize: 22,
+              fontWeight: FontWeight.w700,
+              color: AppColors.stardust,
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 2),
           Text(
             label,
             style: const TextStyle(
-              fontSize: 12,
+              fontSize: 11,
               color: AppColors.textTertiary,
+              fontWeight: FontWeight.w500,
             ),
           ),
         ],
@@ -382,17 +364,17 @@ class _ActivityItem extends StatelessWidget {
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
             color: isActive
-                ? AppColors.success.withValues(alpha: 0.2)
-                : AppColors.surfaceGlass,
-            borderRadius: BorderRadius.circular(12),
+                ? AppColors.bioluminescentMint.withValues(alpha: 0.15)
+                : AppColors.zinc800,
+            borderRadius: BorderRadius.circular(10),
           ),
           child: Icon(
             icon,
-            color: isActive ? AppColors.success : AppColors.textSecondary,
-            size: 20,
+            color: isActive ? AppColors.bioluminescentMint : AppColors.textSecondary,
+            size: 18,
           ),
         ),
-        const SizedBox(width: 14),
+        const SizedBox(width: 12),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -400,28 +382,37 @@ class _ActivityItem extends StatelessWidget {
               Text(
                 title,
                 style: const TextStyle(
-                  fontSize: 14,
+                  fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
+                  color: AppColors.stardust,
                 ),
               ),
               const SizedBox(height: 2),
               Text(
                 subtitle,
                 style: const TextStyle(
-                  fontSize: 12,
+                  fontSize: 11,
                   color: AppColors.textTertiary,
                 ),
               ),
             ],
           ),
         ),
-        Text(
-          time,
-          style: TextStyle(
-            fontSize: 12,
-            color: isActive ? AppColors.success : AppColors.textTertiary,
-            fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          decoration: BoxDecoration(
+            color: isActive
+                ? AppColors.bioluminescentMint.withValues(alpha: 0.15)
+                : AppColors.zinc800,
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: Text(
+            time,
+            style: TextStyle(
+              fontSize: 10,
+              color: isActive ? AppColors.bioluminescentMint : AppColors.textTertiary,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
       ],
@@ -432,32 +423,25 @@ class _ActivityItem extends StatelessWidget {
 class _TipCard extends StatelessWidget {
   final IconData icon;
   final String title;
-  final List<Color> gradient;
+  final Color color;
 
   const _TipCard({
     required this.icon,
     required this.title,
-    required this.gradient,
+    required this.color,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 140,
+      width: 130,
       margin: const EdgeInsets.only(right: 12),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            gradient[0].withValues(alpha: 0.3),
-            gradient[1].withValues(alpha: 0.1),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(20),
+        color: color.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: gradient[0].withValues(alpha: 0.3),
+          color: color.withValues(alpha: 0.2),
         ),
       ),
       child: Column(
@@ -467,18 +451,18 @@ class _TipCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              gradient: LinearGradient(colors: gradient),
+              color: color.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(icon, color: Colors.white, size: 20),
+            child: Icon(icon, color: color, size: 18),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
           Text(
             title,
             style: const TextStyle(
-              fontSize: 13,
+              fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
+              color: AppColors.stardust,
             ),
           ),
         ],

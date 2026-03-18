@@ -3,8 +3,9 @@ import 'package:provider/provider.dart';
 import '../providers/detox_provider.dart';
 import '../theme/app_colors.dart';
 import '../widgets/power_button.dart';
-import '../widgets/glass_card.dart';
+import '../widgets/bouncing_card.dart';
 
+/// Project Zenith - Home Screen
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
@@ -22,7 +23,7 @@ class HomeScreen extends StatelessWidget {
                 // Header
                 _buildHeader(context),
 
-                const SizedBox(height: 40),
+                const SizedBox(height: 48),
 
                 // Power Button
                 _buildPowerSection(context, provider),
@@ -32,7 +33,7 @@ class HomeScreen extends StatelessWidget {
                 // Quick Stats
                 _buildStatsSection(context, provider),
 
-                const SizedBox(height: 24),
+                const SizedBox(height: 20),
 
                 // Error Banner
                 if (provider.errorMessage != null)
@@ -54,13 +55,20 @@ class HomeScreen extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Row(
         children: [
-          ShaderMask(
-            shaderCallback: (bounds) => const LinearGradient(
-              colors: [AppColors.primaryPurple, AppColors.primaryCyan],
-            ).createShader(bounds),
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [AppColors.electricIndigo, AppColors.bioluminescentMint],
+              ),
+            ),
             child: const Icon(
               Icons.shield_rounded,
-              size: 32,
+              size: 22,
               color: Colors.white,
             ),
           ),
@@ -68,9 +76,10 @@ class HomeScreen extends StatelessWidget {
           const Text(
             'SocialDetox',
             style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
+              fontSize: 22,
+              fontWeight: FontWeight.w700,
+              color: AppColors.stardust,
+              letterSpacing: -0.5,
             ),
           ),
         ],
@@ -96,21 +105,12 @@ class HomeScreen extends StatelessWidget {
                 },
         ),
 
-        const SizedBox(height: 24),
+        const SizedBox(height: 28),
 
-        // Status Text
-        Text(
-          provider.isVpnActive ? 'Protection Active' : 'Tap to Protect',
-          style: TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-            color: provider.isVpnActive
-                ? AppColors.success
-                : AppColors.textPrimary,
-          ),
-        ),
+        // Status Pill
+        _StatusPill(isActive: provider.isVpnActive),
 
-        const SizedBox(height: 8),
+        const SizedBox(height: 12),
 
         Text(
           provider.isVpnActive
@@ -121,6 +121,7 @@ class HomeScreen extends StatelessWidget {
           style: const TextStyle(
             fontSize: 14,
             color: AppColors.textSecondary,
+            fontWeight: FontWeight.w400,
           ),
         ),
       ],
@@ -134,21 +135,21 @@ class HomeScreen extends StatelessWidget {
         children: [
           Expanded(
             child: _StatCard(
-              icon: Icons.apps_rounded,
+              icon: Icons.block_rounded,
               value: '${provider.blockedAppsCount}',
               label: 'Blocked Apps',
-              gradient: const [AppColors.primaryPurple, AppColors.primaryPurpleLight],
+              color: AppColors.coralWarning,
             ),
           ),
           const SizedBox(width: 12),
           Expanded(
             child: _StatCard(
-              icon: Icons.access_time_rounded,
+              icon: Icons.verified_user_rounded,
               value: provider.isVpnActive ? 'Active' : 'Ready',
               label: 'Status',
-              gradient: provider.isVpnActive
-                  ? const [AppColors.success, AppColors.successLight]
-                  : const [AppColors.primaryCyan, AppColors.primaryBlue],
+              color: provider.isVpnActive
+                  ? AppColors.bioluminescentMint
+                  : AppColors.electricIndigo,
             ),
           ),
         ],
@@ -157,33 +158,42 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildErrorBanner(BuildContext context, DetoxProvider provider) {
-    return GlassCard(
+    return BouncingCard(
       margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-      padding: const EdgeInsets.all(16),
-      border: Border.all(
-        color: AppColors.error.withValues(alpha: 0.3),
-      ),
+      padding: const EdgeInsets.all(14),
+      backgroundColor: AppColors.coralWarning.withValues(alpha: 0.1),
       child: Row(
         children: [
-          const Icon(
-            Icons.warning_amber_rounded,
-            color: AppColors.error,
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: AppColors.coralWarning.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: const Icon(
+              Icons.warning_amber_rounded,
+              color: AppColors.coralWarning,
+              size: 20,
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
               provider.errorMessage!,
               style: const TextStyle(
-                color: AppColors.error,
+                color: AppColors.coralWarning,
                 fontWeight: FontWeight.w500,
+                fontSize: 13,
               ),
             ),
           ),
-          IconButton(
-            icon: const Icon(Icons.close, size: 20, color: AppColors.error),
-            onPressed: provider.clearError,
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(),
+          GestureDetector(
+            onTap: provider.clearError,
+            child: const Icon(
+              Icons.close_rounded,
+              size: 20,
+              color: AppColors.coralWarning,
+            ),
           ),
         ],
       ),
@@ -193,7 +203,7 @@ class HomeScreen extends StatelessWidget {
   Widget _buildBlockedAppsPreview(BuildContext context, DetoxProvider provider) {
     final appsToShow = provider.blockedApps.take(3).toList();
 
-    return GlassCard(
+    return BouncingCard(
       margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -204,17 +214,24 @@ class HomeScreen extends StatelessWidget {
               const Text(
                 'Blocked Apps',
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: 15,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
+                  color: AppColors.stardust,
                 ),
               ),
-              Text(
-                'View all →',
-                style: TextStyle(
-                  fontSize: 13,
-                  color: AppColors.primaryCyan,
-                  fontWeight: FontWeight.w500,
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppColors.bioluminescentMint.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: const Text(
+                  'View all',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: AppColors.bioluminescentMint,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ],
@@ -226,25 +243,23 @@ class HomeScreen extends StatelessWidget {
             children: [
               ...appsToShow.map((app) => Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
+                      horizontal: 10,
+                      vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color: AppColors.surfaceGlass,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.1),
-                      ),
+                      color: AppColors.zinc800,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: AppColors.cardBorder),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Container(
-                          width: 24,
-                          height: 24,
+                          width: 22,
+                          height: 22,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(6),
-                            color: AppColors.backgroundDarkSecondary,
+                            color: AppColors.zinc700,
                           ),
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(6),
@@ -252,7 +267,7 @@ class HomeScreen extends StatelessWidget {
                                 ? Image.memory(app.icon!, fit: BoxFit.cover)
                                 : const Icon(
                                     Icons.android_rounded,
-                                    size: 16,
+                                    size: 14,
                                     color: AppColors.textSecondary,
                                   ),
                           ),
@@ -261,8 +276,9 @@ class HomeScreen extends StatelessWidget {
                         Text(
                           app.appName,
                           style: const TextStyle(
-                            fontSize: 13,
-                            color: AppColors.textPrimary,
+                            fontSize: 12,
+                            color: AppColors.stardust,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       ],
@@ -272,20 +288,21 @@ class HomeScreen extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 12,
-                    vertical: 8,
+                    vertical: 6,
                   ),
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [AppColors.primaryPurple, AppColors.primaryCyan],
+                    color: AppColors.electricIndigo.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: AppColors.electricIndigo.withValues(alpha: 0.4),
                     ),
-                    borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
-                    '+${provider.blockedAppsCount - 3} more',
+                    '+${provider.blockedAppsCount - 3}',
                     style: const TextStyle(
-                      fontSize: 13,
-                      color: Colors.white,
-                      fontWeight: FontWeight.w500,
+                      fontSize: 12,
+                      color: AppColors.electricIndigo,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
@@ -297,33 +314,90 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
+/// Status pill showing protection state
+class _StatusPill extends StatelessWidget {
+  final bool isActive;
+
+  const _StatusPill({required this.isActive});
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOutCubic,
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      decoration: BoxDecoration(
+        color: isActive
+            ? AppColors.bioluminescentMint.withValues(alpha: 0.15)
+            : AppColors.zinc800,
+        borderRadius: BorderRadius.circular(99),
+        border: Border.all(
+          color: isActive
+              ? AppColors.bioluminescentMint.withValues(alpha: 0.4)
+              : AppColors.cardBorder,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 8,
+            height: 8,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: isActive ? AppColors.bioluminescentMint : AppColors.textTertiary,
+              boxShadow: isActive
+                  ? [
+                      BoxShadow(
+                        color: AppColors.bioluminescentMint.withValues(alpha: 0.6),
+                        blurRadius: 8,
+                      ),
+                    ]
+                  : null,
+            ),
+          ),
+          const SizedBox(width: 10),
+          Text(
+            isActive ? 'Protection Active' : 'Tap to Protect',
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              color: isActive ? AppColors.bioluminescentMint : AppColors.stardust,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _StatCard extends StatelessWidget {
   final IconData icon;
   final String value;
   final String label;
-  final List<Color> gradient;
+  final Color color;
 
   const _StatCard({
     required this.icon,
     required this.value,
     required this.label,
-    required this.gradient,
+    required this.color,
   });
 
   @override
   Widget build(BuildContext context) {
-    return GlassCard(
+    return BouncingCard(
       margin: EdgeInsets.zero,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(14),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              gradient: LinearGradient(colors: gradient),
-              borderRadius: BorderRadius.circular(12),
+              color: color.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(icon, color: Colors.white, size: 22),
+            child: Icon(icon, color: color, size: 20),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -333,16 +407,18 @@ class _StatCard extends StatelessWidget {
                 Text(
                   value,
                   style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
+                    fontSize: 17,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.stardust,
                   ),
                 ),
+                const SizedBox(height: 2),
                 Text(
                   label,
                   style: const TextStyle(
-                    fontSize: 12,
+                    fontSize: 11,
                     color: AppColors.textTertiary,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ],

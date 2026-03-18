@@ -1,91 +1,123 @@
 import 'package:flutter/material.dart';
 
+/// Project Zenith - Cybernetic Design System
 class AppColors {
   AppColors._();
 
-  // Primary Gradient Colors
-  static const Color primaryPurple = Color(0xFF6C5CE7);
-  static const Color primaryPurpleLight = Color(0xFFA29BFE);
-  static const Color primaryCyan = Color(0xFF00D2D3);
-  static const Color primaryBlue = Color(0xFF54A0FF);
+  // ============================================
+  // ZENITH CORE PALETTE
+  // ============================================
 
-  // Background Colors
-  static const Color backgroundDark = Color(0xFF0A0E27);
-  static const Color backgroundDarkSecondary = Color(0xFF1A1F3D);
-  static const Color backgroundDarkTertiary = Color(0xFF252B4A);
+  // Background - Obsidian Base
+  static const Color obsidianBase = Color(0xFF09090B);
+  static const Color elevatedSurface = Color(0xFF18181B);
+  static const Color zinc900 = Color(0xFF18181B);
+  static const Color zinc800 = Color(0xFF27272A);
+  static const Color zinc700 = Color(0xFF3F3F46);
+  static const Color zinc600 = Color(0xFF52525B);
+  static const Color zinc500 = Color(0xFF71717A);
 
-  // Surface Colors (Glass effect)
-  static const Color surfaceGlass = Color(0x1AFFFFFF);
-  static const Color surfaceGlassLight = Color(0x33FFFFFF);
-  static const Color surfaceGlassDark = Color(0x0DFFFFFF);
+  // Primary States
+  static const Color electricIndigo = Color(0xFF4F46E5);
+  static const Color electricIndigoLight = Color(0xFF6366F1);
+  static const Color bioluminescentMint = Color(0xFF10B981);
+  static const Color bioluminescentMintLight = Color(0xFF34D399);
 
-  // Text Colors
-  static const Color textPrimary = Color(0xFFFFFFFF);
-  static const Color textSecondary = Color(0xB3FFFFFF);
-  static const Color textTertiary = Color(0x66FFFFFF);
-  static const Color textMuted = Color(0x4DFFFFFF);
+  // Warning/Error/Amber
+  static const Color coralWarning = Color(0xFFF43F5E);
+  static const Color coralWarningLight = Color(0xFFFB7185);
+  static const Color amber = Color(0xFFF59E0B);
+  static const Color amberLight = Color(0xFFFBBF24);
 
-  // Status Colors
-  static const Color success = Color(0xFF00B894);
-  static const Color successLight = Color(0xFF55EFC4);
-  static const Color error = Color(0xFFFF6B6B);
-  static const Color errorLight = Color(0xFFFF8E8E);
-  static const Color warning = Color(0xFFFDAA5E);
-  static const Color info = Color(0xFF74B9FF);
+  // Text - Stardust System
+  static const Color stardust = Color(0xFFFAFAFA);
+  static const Color textPrimary = stardust;
+  static const Color textSecondary = Color(0x99FFFFFF); // 60% white
+  static const Color textTertiary = Color(0x66FFFFFF);  // 40% white
+  static const Color textMuted = Color(0x40FFFFFF);     // 25% white
 
-  // Button/Active States
-  static const Color activeGreen = Color(0xFF00B894);
-  static const Color inactiveGray = Color(0xFF636E72);
+  // Borders
+  static const Color cardBorder = Color(0x0AFFFFFF);    // 4% white
+  static const Color subtleBorder = Color(0x14FFFFFF);  // 8% white
 
-  // Gradients
+  // ============================================
+  // LEGACY ALIASES (for backward compatibility)
+  // ============================================
+  static const Color primaryPurple = electricIndigo;
+  static const Color primaryPurpleLight = electricIndigoLight;
+  static const Color primaryCyan = bioluminescentMint;
+  static const Color primaryBlue = Color(0xFF3B82F6);
+
+  static const Color backgroundDark = obsidianBase;
+  static const Color backgroundDarkSecondary = elevatedSurface;
+  static const Color backgroundDarkTertiary = zinc800;
+
+  static const Color surfaceGlass = Color(0x0AFFFFFF);
+  static const Color surfaceGlassLight = Color(0x14FFFFFF);
+  static const Color surfaceGlassDark = Color(0x06FFFFFF);
+
+  static const Color success = bioluminescentMint;
+  static const Color successLight = bioluminescentMintLight;
+  static const Color error = coralWarning;
+  static const Color errorLight = coralWarningLight;
+  static const Color warning = amber;
+  static const Color info = Color(0xFF3B82F6);
+
+  static const Color activeGreen = bioluminescentMint;
+  static const Color inactiveGray = zinc700;
+
+  // ============================================
+  // ZENITH GRADIENTS
+  // ============================================
+
   static const LinearGradient primaryGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [primaryPurple, primaryCyan],
+    colors: [electricIndigo, bioluminescentMint],
   );
 
   static const LinearGradient backgroundGradient = LinearGradient(
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
-    colors: [backgroundDark, backgroundDarkSecondary],
+    colors: [obsidianBase, Color(0xFF0C0C0E)],
   );
 
-  static const LinearGradient purpleGradient = LinearGradient(
+  static const LinearGradient indigoGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [primaryPurple, primaryPurpleLight],
+    colors: [electricIndigo, electricIndigoLight],
   );
 
-  static const LinearGradient cyanGradient = LinearGradient(
+  static const LinearGradient mintGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [primaryCyan, primaryBlue],
+    colors: [bioluminescentMint, bioluminescentMintLight],
   );
 
-  static LinearGradient glassGradient = LinearGradient(
+  static const LinearGradient surfaceGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [
-      Colors.white.withValues(alpha: 0.15),
-      Colors.white.withValues(alpha: 0.05),
-    ],
+    colors: [elevatedSurface, zinc900],
   );
 
-  // Power Button States
-  static const LinearGradient powerButtonActive = LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    colors: [success, Color(0xFF00CEC9)],
-  );
+  // Legacy gradient aliases
+  static const LinearGradient purpleGradient = indigoGradient;
+  static const LinearGradient cyanGradient = mintGradient;
+  static const LinearGradient glassGradient = surfaceGradient;
 
-  static const LinearGradient powerButtonInactive = LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    colors: [primaryPurple, primaryCyan],
-  );
+  static const LinearGradient powerButtonActive = mintGradient;
+  static const LinearGradient powerButtonInactive = indigoGradient;
 
-  // Glow Colors
-  static Color glowPurple = primaryPurple.withValues(alpha: 0.5);
-  static Color glowCyan = primaryCyan.withValues(alpha: 0.5);
-  static Color glowGreen = success.withValues(alpha: 0.5);
+  // ============================================
+  // ZENITH GLOW SYSTEM
+  // ============================================
+
+  static const Color glowIndigo = Color(0x334F46E5);    // 20% electricIndigo
+  static const Color glowMint = Color(0x3310B981);      // 20% bioluminescentMint
+  static const Color glowCoral = Color(0x33F43F5E);     // 20% coralWarning
+
+  // Legacy glow aliases
+  static const Color glowPurple = glowIndigo;
+  static const Color glowCyan = glowMint;
+  static const Color glowGreen = glowMint;
 }
