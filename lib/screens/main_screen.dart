@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import '../widgets/bottom_nav_bar.dart';
-import '../theme/app_colors.dart';
+import '../widgets/liquid_background.dart';
+import '../widgets/magnetic_nav.dart';
 import 'home_screen.dart';
 import 'apps_screen.dart';
 import 'stats_screen.dart';
 import 'settings_screen.dart';
 
+/// Project Zenith V2 - Main Screen with Liquid Background & Magnetic Nav
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
 
@@ -27,72 +28,53 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       extendBody: true,
-      body: Stack(
-        children: [
-          // Background gradient
-          Container(
-            decoration: const BoxDecoration(
-              gradient: AppColors.backgroundGradient,
+      body: LiquidBackground(
+        child: Stack(
+          children: [
+            // Screen content
+            IndexedStack(
+              index: _currentIndex,
+              children: _screens,
             ),
-          ),
 
-          // Ambient blobs
-          Positioned(
-            top: -120,
-            right: -80,
-            child: Container(
-              width: 300,
-              height: 300,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    AppColors.primaryPurple.withValues(alpha: 0.3),
-                    Colors.transparent,
-                  ],
-                ),
+            // Magnetic Navigation
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: MagneticNav(
+                currentIndex: _currentIndex,
+                onTap: (index) {
+                  setState(() {
+                    _currentIndex = index;
+                  });
+                },
+                items: const [
+                  MagneticNavItem(
+                    icon: Icons.home_outlined,
+                    activeIcon: Icons.home_rounded,
+                    label: 'Home',
+                  ),
+                  MagneticNavItem(
+                    icon: Icons.apps_outlined,
+                    activeIcon: Icons.apps_rounded,
+                    label: 'Apps',
+                  ),
+                  MagneticNavItem(
+                    icon: Icons.bar_chart_outlined,
+                    activeIcon: Icons.bar_chart_rounded,
+                    label: 'Stats',
+                  ),
+                  MagneticNavItem(
+                    icon: Icons.settings_outlined,
+                    activeIcon: Icons.settings_rounded,
+                    label: 'Settings',
+                  ),
+                ],
               ),
             ),
-          ),
-          Positioned(
-            bottom: 100,
-            left: -100,
-            child: Container(
-              width: 250,
-              height: 250,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    AppColors.primaryCyan.withValues(alpha: 0.2),
-                    Colors.transparent,
-                  ],
-                ),
-              ),
-            ),
-          ),
-
-          // Screen content
-          IndexedStack(
-            index: _currentIndex,
-            children: _screens,
-          ),
-
-          // Bottom navigation
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: BottomNavBar(
-              currentIndex: _currentIndex,
-              onTap: (index) {
-                setState(() {
-                  _currentIndex = index;
-                });
-              },
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

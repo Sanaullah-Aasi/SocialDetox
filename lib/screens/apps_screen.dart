@@ -348,6 +348,7 @@ class _AppsScreenState extends State<AppsScreen> {
             final app = filteredApps[index];
             return AppTile(
               app: app,
+              index: index,
               onTap: () => provider.toggleAppSelection(app.packageName),
             );
           },

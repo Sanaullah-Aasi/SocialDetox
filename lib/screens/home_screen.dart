@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/detox_provider.dart';
 import '../theme/app_colors.dart';
-import '../widgets/power_button.dart';
+import '../widgets/quantum_power_button.dart';
 import '../widgets/bouncing_card.dart';
 
-/// Project Zenith - Home Screen
+/// Project Zenith V2 - Home Screen with Quantum Power Button
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
@@ -90,10 +90,11 @@ class HomeScreen extends StatelessWidget {
   Widget _buildPowerSection(BuildContext context, DetoxProvider provider) {
     return Column(
       children: [
-        // Power Button
-        PowerButton(
+        // Quantum Power Button
+        QuantumPowerButton(
           isActive: provider.isVpnActive,
           isLoading: provider.isLoading,
+          size: 220,
           onTap: provider.blockedAppsCount == 0
               ? null
               : () {

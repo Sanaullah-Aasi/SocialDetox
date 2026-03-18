@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../theme/app_colors.dart';
 
-/// Project Zenith - BouncingCard
-/// A tactile, spring-physics card with haptic feedback
+/// Project Zenith V2 - BouncingCard
+/// A tactile, spring-physics card with squircle shape and glass bevel
 class BouncingCard extends StatefulWidget {
   final Widget child;
   final EdgeInsets? padding;
@@ -18,7 +18,7 @@ class BouncingCard extends StatefulWidget {
     required this.child,
     this.padding,
     this.margin,
-    this.borderRadius = 16,
+    this.borderRadius = 32,
     this.backgroundColor,
     this.onTap,
     this.enabled = true,
@@ -77,19 +77,75 @@ class _BouncingCardState extends State<BouncingCard>
             vertical: 8,
           ),
           padding: widget.padding ?? const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: widget.backgroundColor ?? AppColors.elevatedSurface,
-            borderRadius: BorderRadius.circular(widget.borderRadius),
-            border: Border.all(
-              color: AppColors.cardBorder,
-              width: 1,
+          decoration: ShapeDecoration(
+            shape: ContinuousRectangleBorder(
+              borderRadius: BorderRadius.circular(widget.borderRadius),
+              side: BorderSide(
+                color: AppColors.zinc800,
+                width: 1,
+              ),
             ),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                widget.backgroundColor ?? AppColors.elevatedSurface,
+                (widget.backgroundColor ?? AppColors.elevatedSurface)
+                    .withValues(alpha: 0.95),
+              ],
+            ),
+            shadows: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.2),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
-          child: widget.child,
+          child: Stack(
+            children: [
+              // Inner bevel
+              Positioned.fill(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(widget.borderRadius * 0.75),
+                  child: CustomPaint(
+                    painter: _CardBevelPainter(),
+                  ),
+                ),
+              ),
+              widget.child,
+            ],
+          ),
         ),
       ),
     );
   }
+}
+
+/// Inner bevel painter
+class _CardBevelPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    // Top-left highlight
+    final highlightPaint = Paint()
+      ..shader = LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+          Colors.white.withValues(alpha: 0.04),
+          Colors.white.withValues(alpha: 0.0),
+        ],
+        stops: const [0.0, 0.35],
+      ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
+
+    canvas.drawRect(
+      Rect.fromLTWH(0, 0, size.width * 0.5, size.height * 0.5),
+      highlightPaint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 /// A variant with gradient border for highlighted states
@@ -107,7 +163,7 @@ class BouncingCardHighlight extends StatefulWidget {
     required this.child,
     this.padding,
     this.margin,
-    this.borderRadius = 16,
+    this.borderRadius = 32,
     this.isHighlighted = false,
     this.highlightColor = AppColors.bioluminescentMint,
     this.onTap,
@@ -117,8 +173,43 @@ class BouncingCardHighlight extends StatefulWidget {
   State<BouncingCardHighlight> createState() => _BouncingCardHighlightState();
 }
 
-class _BouncingCardHighlightState extends State<BouncingCardHighlight> {
+class _BouncingCardHighlightState extends State<BouncingCardHighlight>
+    with SingleTickerProviderStateMixin {
   bool _isPressed = false;
+  late AnimationController _glowController;
+  late Animation<double> _glowAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _glowController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    );
+    _glowAnimation = Tween<double>(begin: 0.15, end: 0.35).animate(
+      CurvedAnimation(parent: _glowController, curve: Curves.easeInOutSine),
+    );
+    if (widget.isHighlighted) {
+      _glowController.repeat(reverse: true);
+    }
+  }
+
+  @override
+  void didUpdateWidget(BouncingCardHighlight oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isHighlighted && !oldWidget.isHighlighted) {
+      _glowController.repeat(reverse: true);
+    } else if (!widget.isHighlighted && oldWidget.isHighlighted) {
+      _glowController.stop();
+      _glowController.reset();
+    }
+  }
+
+  @override
+  void dispose() {
+    _glowController.dispose();
+    super.dispose();
+  }
 
   void _handleTapDown(TapDownDetails details) {
     setState(() => _isPressed = true);
@@ -156,32 +247,52 @@ class _BouncingCardHighlightState extends State<BouncingCardHighlight> {
             child: child,
           );
         },
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          margin: widget.margin ?? const EdgeInsets.symmetric(
-            horizontal: 20,
-            vertical: 8,
-          ),
-          padding: widget.padding ?? const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: AppColors.elevatedSurface,
-            borderRadius: BorderRadius.circular(widget.borderRadius),
-            border: Border.all(
-              color: widget.isHighlighted
-                  ? widget.highlightColor.withValues(alpha: 0.5)
-                  : AppColors.cardBorder,
-              width: widget.isHighlighted ? 1.5 : 1,
-            ),
-            boxShadow: widget.isHighlighted
-                ? [
+        child: AnimatedBuilder(
+          animation: _glowAnimation,
+          builder: (context, child) {
+            return Container(
+              margin: widget.margin ?? const EdgeInsets.symmetric(
+                horizontal: 20,
+                vertical: 8,
+              ),
+              padding: widget.padding ?? const EdgeInsets.all(16),
+              decoration: ShapeDecoration(
+                shape: ContinuousRectangleBorder(
+                  borderRadius: BorderRadius.circular(widget.borderRadius),
+                  side: BorderSide(
+                    color: widget.isHighlighted
+                        ? widget.highlightColor.withValues(alpha: 0.5)
+                        : AppColors.zinc800,
+                    width: widget.isHighlighted ? 1.5 : 1,
+                  ),
+                ),
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    AppColors.elevatedSurface,
+                    AppColors.elevatedSurface.withValues(alpha: 0.95),
+                  ],
+                ),
+                shadows: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.2),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                  if (widget.isHighlighted)
                     BoxShadow(
-                      color: widget.highlightColor.withValues(alpha: 0.15),
+                      color: widget.highlightColor.withValues(
+                        alpha: _glowAnimation.value,
+                      ),
                       blurRadius: 20,
                       spreadRadius: 0,
                     ),
-                  ]
-                : null,
-          ),
+                ],
+              ),
+              child: child,
+            );
+          },
           child: widget.child,
         ),
       ),
