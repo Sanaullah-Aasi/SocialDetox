@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'providers/detox_provider.dart';
+import 'providers/subscription_provider.dart';
 import 'screens/splash_screen.dart';
 import 'theme/app_theme.dart';
 
@@ -32,8 +33,21 @@ class SocialDetoxApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => DetoxProvider(),
+    return MultiProvider(
+      providers: [
+        // Subscription provider (independent)
+        ChangeNotifierProvider(
+          create: (_) => SubscriptionProvider()..initialize(),
+        ),
+        // Detox provider (depends on subscription)
+        ChangeNotifierProxyProvider<SubscriptionProvider, DetoxProvider>(
+          create: (_) => DetoxProvider(),
+          update: (_, subscriptionProvider, detoxProvider) {
+            detoxProvider!.updateProStatus(subscriptionProvider.isPro);
+            return detoxProvider;
+          },
+        ),
+      ],
       child: MaterialApp(
         title: 'SocialDetox',
         debugShowCheckedModeBanner: false,

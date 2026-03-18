@@ -5,8 +5,9 @@ import '../providers/detox_provider.dart';
 import '../theme/app_colors.dart';
 import '../widgets/app_tile.dart';
 import '../widgets/bouncing_card.dart';
+import '../widgets/zenith_paywall.dart';
 
-/// Project Zenith - Apps Screen
+/// Project Zenith V2 - Apps Screen with Paywall Integration
 class AppsScreen extends StatefulWidget {
   const AppsScreen({super.key});
 
@@ -19,9 +20,25 @@ class _AppsScreenState extends State<AppsScreen> {
   final TextEditingController _searchController = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    // Set paywall callback after first frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final provider = Provider.of<DetoxProvider>(context, listen: false);
+      provider.onPaywallTriggered = _showPaywall;
+    });
+  }
+
+  @override
   void dispose() {
+    final provider = Provider.of<DetoxProvider>(context, listen: false);
+    provider.onPaywallTriggered = null;
     _searchController.dispose();
     super.dispose();
+  }
+
+  void _showPaywall() {
+    ZenithPaywall.show(context);
   }
 
   @override

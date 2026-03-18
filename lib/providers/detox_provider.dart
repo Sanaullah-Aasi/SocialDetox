@@ -3,8 +3,23 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:social_detox_core/social_detox_core.dart';
 
+/// Custom exception thrown when free user hits the 3-app limit
+class PaywallLimitException implements Exception {
+  final String message;
+  PaywallLimitException(this.message);
+  
+  @override
+  String toString() => 'PaywallLimitException: $message';
+}
+
 class DetoxProvider with ChangeNotifier {
   final VpnService _vpnService = VpnService();
+  
+  // Paywall callback
+  VoidCallback? onPaywallTriggered;
+  
+  // Pro status (injected externally)
+  bool _isPro = false;
 
   // State
   List<AppInfo> _installedApps = [];
@@ -20,9 +35,18 @@ class DetoxProvider with ChangeNotifier {
   bool get isVpnActive => _isVpnActive;
   String? get errorMessage => _errorMessage;
   int get blockedAppsCount => blockedApps.length;
+  bool get isPro => _isPro;
 
   DetoxProvider() {
     _initialize();
+  }
+  
+  /// Update Pro status (called from outside when subscription changes)
+  void updateProStatus(bool isPro) {
+    if (_isPro != isPro) {
+      _isPro = isPro;
+      notifyListeners();
+    }
   }
 
   Future<void> _initialize() async {
@@ -114,13 +138,27 @@ class DetoxProvider with ChangeNotifier {
     }
   }
 
-  /// Toggle app selection
+  /// Toggle app selection with paywall enforcement
   void toggleAppSelection(String packageName) {
     final index = _installedApps.indexWhere(
       (app) => app.packageName == packageName,
     );
 
     if (index != -1) {
+      final app = _installedApps[index];
+      final isCurrentlySelected = app.isSelected;
+      
+      // If trying to SELECT a new app (not deselect)
+      if (!isCurrentlySelected) {
+        // Check if free user is at the 3-app limit
+        if (!_isPro && blockedAppsCount >= 3) {
+          // Trigger paywall
+          onPaywallTriggered?.call();
+          return; // Don't allow selection
+        }
+      }
+      
+      // Allow toggle
       _installedApps[index].isSelected = !_installedApps[index].isSelected;
       _saveSelections();
       notifyListeners();

@@ -16,6 +16,7 @@ class AppColors {
   static const Color zinc700 = Color(0xFF3F3F46);
   static const Color zinc600 = Color(0xFF52525B);
   static const Color zinc500 = Color(0xFF71717A);
+  static const Color zinc400 = Color(0xFFA1A1AA);
 
   // Primary States
   static const Color electricIndigo = Color(0xFF4F46E5);

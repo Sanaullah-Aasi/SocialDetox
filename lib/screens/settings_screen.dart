@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../providers/detox_provider.dart';
+import '../providers/subscription_provider.dart';
 import '../theme/app_colors.dart';
 import '../widgets/bouncing_card.dart';
+import '../widgets/zenith_paywall.dart';
 
-/// Project Zenith - Settings Screen
+/// Project Zenith V2 - Settings Screen with Pro Upgrade
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
@@ -23,6 +25,21 @@ class SettingsScreen extends StatelessWidget {
             _buildHeader(),
 
             const SizedBox(height: 24),
+
+            // Pro Upgrade Card (if not Pro)
+            Consumer<SubscriptionProvider>(
+              builder: (context, subProvider, _) {
+                if (!subProvider.isPro) {
+                  return Column(
+                    children: [
+                      _buildProUpgradeCard(context, subProvider),
+                      const SizedBox(height: 24),
+                    ],
+                  );
+                }
+                return const SizedBox.shrink();
+              },
+            ),
 
             // Profile Card
             _buildProfileCard(),
@@ -60,6 +77,91 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
+  Widget _buildProUpgradeCard(BuildContext context, SubscriptionProvider subProvider) {
+    return GestureDetector(
+      onTap: () {
+        HapticFeedback.mediumImpact();
+        ZenithPaywall.show(context);
+      },
+      child: BouncingCard(
+        borderRadius: 40,
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: ShapeDecoration(
+            shape: ContinuousRectangleBorder(
+              borderRadius: BorderRadius.circular(40),
+            ),
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                AppColors.electricIndigo,
+                Color(0xFF3730A3),
+              ],
+            ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 60,
+                height: 60,
+                decoration: const ShapeDecoration(
+                  shape: ContinuousRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(28)),
+                  ),
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      AppColors.bioluminescentMint,
+                      Color(0xFF059669),
+                    ],
+                  ),
+                ),
+                child: const Icon(
+                  Icons.workspace_premium_rounded,
+                  color: Colors.white,
+                  size: 32,
+                ),
+              ),
+              const SizedBox(width: 16),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Upgrade to Pro',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white,
+                        letterSpacing: -0.3,
+                      ),
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      'Block unlimited apps',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.white70,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(
+                Icons.arrow_forward_ios_rounded,
+                color: Colors.white,
+                size: 20,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildHeader() {
     return const Padding(
       padding: EdgeInsets.symmetric(horizontal: 24),
@@ -76,75 +178,76 @@ class SettingsScreen extends StatelessWidget {
   }
 
   Widget _buildProfileCard() {
-    return BouncingCard(
-      backgroundColor: AppColors.electricIndigo.withValues(alpha: 0.15),
-      child: Row(
-        children: [
-          Container(
-            width: 56,
-            height: 56,
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [AppColors.electricIndigo, AppColors.bioluminescentMint],
+    return Consumer<SubscriptionProvider>(
+      builder: (context, subProvider, _) {
+        return BouncingCard(
+          backgroundColor: AppColors.electricIndigo.withValues(alpha: 0.15),
+          child: Row(
+            children: [
+              Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [AppColors.electricIndigo, AppColors.bioluminescentMint],
+                  ),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: const Icon(
+                  Icons.person_rounded,
+                  color: Colors.white,
+                  size: 28,
+                ),
               ),
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: const Icon(
-              Icons.person_rounded,
-              color: Colors.white,
-              size: 28,
-            ),
-          ),
-          const SizedBox(width: 14),
-          const Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'SocialDetox User',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.stardust,
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'SocialDetox User',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.stardust,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      subProvider.isPro ? 'Premium Features Unlocked' : 'Free Plan - 3 Apps Max',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (subProvider.isPro)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: AppColors.bioluminescentMint.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: const Text(
+                    'PRO',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.bioluminescentMint,
+                      letterSpacing: 0.5,
+                    ),
                   ),
                 ),
-                SizedBox(height: 4),
-                Text(
-                  'Premium Features Unlocked',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-              ],
-            ),
+            ],
           ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: AppColors.bioluminescentMint.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                color: AppColors.bioluminescentMint.withValues(alpha: 0.4),
-              ),
-            ),
-            child: const Text(
-              'PRO',
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
-                color: AppColors.bioluminescentMint,
-                letterSpacing: 0.5,
-              ),
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
-
   Widget _buildSectionTitle(String title) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
